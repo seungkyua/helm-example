@@ -1,0 +1,12 @@
+favorite:
+  drink: coffee
+  food: pizza
+
+hobby: {}
+
+pizzaToppings:
+  - mushrooms
+  - cheese
+  - peppers
+  - onions
+

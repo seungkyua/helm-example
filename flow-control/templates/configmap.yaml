@@ -1,0 +1,128 @@
+# if equals
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  myvalue: "Hello World"
+  drink: {{ .Values.favorite.drink | default "tea" | quote }}
+  food: {{ .Values.favorite.food | upper | quote }}
+  {{- if eq .Values.favorite.drink "coffee" }}
+  mug: "true"
+  {{- end }}
+  
+  # with function
+  {{- with .Values.hobby }}
+  sports: {{ .sports }}
+  {{- end }}
+
+---
+# root scope - $
+piVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  myvalue: "Hello World"
+  {{- with .Values.favorite }}
+  drink: {{ .drink | default "tea" | quote }}
+  food: {{ .food | upper | quote }}
+  release: {{ $.Release.Name }}
+  {{- end }}
+
+
+---
+# range - list
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  toppings: |-
+    {{- range .Values.pizzaToppings }}
+    - {{ . | title | quote }}
+    {{- end }}
+
+
+---
+# range - tuple
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  sizes: |-
+    {{- range tuple "small" "medium" "large" }}
+    - {{ . }}
+    {{- end }}
+
+
+---
+# range - list with index and value
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  toppings: |-
+    {{- range $index, $value := .Values.pizzaToppings }}
+    - {{ $index }}: {{ $value }}
+    {{- end }}
+
+
+
+---
+# range - map with key and value
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  favorite: |-
+    {{- range $key, $value := .Values.favorite }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+
+
+---
+# define - tempate - _helper.tpl
+{{- /* define "mychart.labels" }}
+  labels:
+    generator: helm
+    date: {{ now | htmlDate }}
+{{- end */}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+  {{- template "mychart.labels" . }}
+data:
+  myvalue: "Hello World"
+
+
+
+---
+# define - template (2) - _helper.tpl
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+  labels:
+    {{ template "mychart.app" . }}
+data:
+  myvalue: "Hello World"
+{{ template "mychart.app" . }}
+
+
+
+---
+# define - include - _helper.tpl
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+  labels:
+    {{- include "mychart.app" . | nindent 4 }}
+data:
+  myvalue: "Hello World"
+{{- include "mychart.app" . | nindent 2 }}
